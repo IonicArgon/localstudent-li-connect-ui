@@ -12,7 +12,6 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         self.header_file = None
         self.cookie_file = None
         self.message_file = None
-        self.status_text = []
         self.has_started = False
 
         self._setup_ui()
@@ -250,17 +249,42 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         if (self.has_started == False):
             self.start_button.setText("Stop")
             self.has_started = True
-            self.status_text_box.append("Starting...")
-            self._update_status_text_box()
+            self._update_status_text_box("Starting...")
             print("Received start signal.")
         else:
             self.start_button.setText("Start")
             self.has_started = False
-            self.status_text_box.append("Stopping...")
-            self._update_status_text_box()
+            self._update_status_text_box("Stopping...")
             print("Received stop signal.")
 
-    def _update_status_text_box(self):
-        text = "\n".join(self.status_text)
+    def _update_status_text_box(self, text):
+        text = text + "\n"
         self.status_text_box.insertPlainText(text)
+        self.status_text_box.verticalScrollBar().setValue(self.status_text_box.verticalScrollBar().maximum())
+
+    # public
+    def get_link(self):
+        return self.link
+    
+    def get_recruiter_name(self):
+        return self.recruiter_name
+    
+    def get_header_file(self):
+        return self.header_file
+    
+    def get_cookie_file(self):
+        return self.cookie_file
+    
+    def get_message_file(self):
+        return self.message_file
+    
+    def get_has_started(self):
+        return self.has_started
+    
+    def add_status_text(self, text):
+        self._update_status_text_box(text)
+
+    def clear_status_text(self):
+        self.status_text = []
+        self.status_text_box.clear()
     
