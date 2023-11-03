@@ -1,4 +1,5 @@
 import requests
+import json
 import random as r
 
 # exceptions
@@ -6,7 +7,7 @@ class InvalidCredentials(Exception):
     pass
 
 class Base:
-    def __init__(self, headers: dict = None, cookies: dict = None):
+    def __init__(self, headers: str = None, cookies: str = None):
         self.m_headers = None
         self.m_cookies = None
         self.m_session = requests.Session()
@@ -21,12 +22,14 @@ class Base:
         ]
 
         if headers is not None:
-            self.m_headers = headers
+            with open(headers, "r", encoding="utf-8") as f:
+                self.m_headers = json.load(f)
         else:
             raise InvalidCredentials("No headers provided")
 
         if cookies is not None:
-            self.m_cookies = cookies
+            with open(cookies, "r", encoding="utf-8") as f:
+                self.m_cookies = json.load(f)
         else:
             raise InvalidCredentials("No cookies provided")
         

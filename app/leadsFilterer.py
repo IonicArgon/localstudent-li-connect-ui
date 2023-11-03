@@ -67,6 +67,18 @@ class LeadsFilterer():
                 dict(t) for t in {tuple(d.items()) for d in self.m_filtered_leads}
             ]
 
+    def ignore_duplicates(self, connected_leads_csv: str):
+        if connected_leads_csv is None:
+            return
+
+        connected_leads = []
+        with open(connected_leads_csv, "r", encoding="utf-8") as f:
+            connected_leads = f.read().split("\n")
+
+        for lead in self.m_filtered_leads:
+            if lead["profile_id"] in connected_leads:
+                self.m_filtered_leads.remove(lead)
+
     def get_filtered_leads(self) -> list:
         return self.m_filtered_leads
     

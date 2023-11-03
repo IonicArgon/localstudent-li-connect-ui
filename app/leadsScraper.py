@@ -43,6 +43,8 @@ class LeadsScraper(Base):
             # make the request
             response = self.m_session.get(url, timeout=10)
 
+            print(f"Got response code {response.status_code}")
+
             # check if the request was successful
             if response.status_code != 200:
                 break
@@ -71,21 +73,3 @@ class LeadsScraper(Base):
 
         return 0
 
-
-## temporary testing
-# if __name__ == "__main__":
-#     fetcher = LeadsScraper(
-#         headers=os.path.join(os.getcwd(), "test/identities/mike/headers.json"),
-#         cookies=os.path.join(os.getcwd(), "test/identities/mike/cookies.json"),
-#     )
-
-#     url = None
-#     with open("test/links/testViper.txt", "r") as f:
-#         url = f.read()
-
-#     print("about to scrape")
-#     fetcher.scrape(url, can_count=25, can_end=2000)
-
-#     print("scraping complete, writing to file")
-#     with open("test/leads.json", "w") as f:
-#         json.dump(fetcher.get_leads(), f, indent=4)

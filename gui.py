@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtWidgets
 class GUI_MainWindow(QtWidgets.QMainWindow):
     def __init__(self, help_window):
         super(GUI_MainWindow, self).__init__()
-        self.setGeometry(50, 50, 700, 500)
+        self.setGeometry(50, 50, 700, 600)
         self.setWindowTitle("LocalStudent LinkedIn Connect")
 
         self.help_window = help_window
@@ -13,6 +13,11 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         self.cookie_file = None
         self.message_file = None
         self.has_started = False
+        self.can_start = 0
+        self.can_count = 25
+        self.can_end = 100
+        self.connect_count = 10
+        self.json_data = None
 
         self._setup_ui()
 
@@ -124,29 +129,89 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         self.message_file_button.setIcon(folder_icon)
         self.message_file_button.clicked.connect(self._on_message_file_button_clicked)
 
-        # button to show help window
-        # justified to left, 25 px away from edge of window
+        # field for can start, default 0
+        self.can_start_label = QtWidgets.QLabel(self)
+        self.can_start_label.setGeometry(QtCore.QRect(25, 300, 175, 50))
+        self.can_start_label.setText("Candidate to Start At")
+        self.can_start_label.setStyleSheet("font-size: 15px;")
+        self.can_start_label.setAlignment(QtCore.Qt.AlignLeft)
+        self.can_start_label.setObjectName("can-start-label")
+        self.can_start_line_edit = QtWidgets.QLineEdit(self)
+        self.can_start_line_edit.setGeometry(QtCore.QRect(25, 325, 175, 25))
+        self.can_start_line_edit.setText("0")
+        self.can_start_line_edit.setObjectName("can-start-line-edit")
+        self.can_start_line_edit.returnPressed.connect(self._on_can_start_line_edit_enter)
+
+        # same above but for can count, default 25
+        self.can_count_label = QtWidgets.QLabel(self)
+        self.can_count_label.setGeometry(QtCore.QRect(25, 350, 175, 50))
+        self.can_count_label.setText("Candidates per Page")
+        self.can_count_label.setStyleSheet("font-size: 15px;")
+        self.can_count_label.setAlignment(QtCore.Qt.AlignLeft)
+        self.can_count_label.setObjectName("can-count-label")
+        self.can_count_line_edit = QtWidgets.QLineEdit(self)
+        self.can_count_line_edit.setGeometry(QtCore.QRect(25, 375, 175, 25))
+        self.can_count_line_edit.setText("25")
+        self.can_count_line_edit.setObjectName("can-count-line-edit")
+        self.can_count_line_edit.returnPressed.connect(self._on_can_count_line_edit_enter)
+
+        # same above but for can end, default 100
+        self.can_end_label = QtWidgets.QLabel(self)
+        self.can_end_label.setGeometry(QtCore.QRect(25, 400, 175, 50))
+        self.can_end_label.setText("Candidate to End At")
+        self.can_end_label.setStyleSheet("font-size: 15px;")
+        self.can_end_label.setAlignment(QtCore.Qt.AlignLeft)
+        self.can_end_label.setObjectName("can-end-label")
+        self.can_end_line_edit = QtWidgets.QLineEdit(self)
+        self.can_end_line_edit.setGeometry(QtCore.QRect(25, 425, 175, 25))
+        self.can_end_line_edit.setText("100")
+        self.can_end_line_edit.setObjectName("can-end-line-edit")
+        self.can_end_line_edit.returnPressed.connect(self._on_can_end_line_edit_enter)
+
+        # field for how many connection to send in this batch
+        # 25 px away from left edge, below everything currently
+        # default 10
+        self.connect_count_label = QtWidgets.QLabel(self)
+        self.connect_count_label.setGeometry(QtCore.QRect(25, 450, 175, 50))
+        self.connect_count_label.setText("Connections to Send")
+        self.connect_count_label.setStyleSheet("font-size: 15px;")
+        self.connect_count_label.setAlignment(QtCore.Qt.AlignLeft)
+        self.connect_count_label.setObjectName("connect-count-label")
+        self.connect_count_line_edit = QtWidgets.QLineEdit(self)
+        self.connect_count_line_edit.setGeometry(QtCore.QRect(25, 475, 175, 25))
+        self.connect_count_line_edit.setText("10")
+        self.connect_count_line_edit.setObjectName("connect-count-line-edit")
+        self.connect_count_line_edit.returnPressed.connect(self._on_connect_count_line_edit_enter)
+
+
+        # help button opens help window, underneath all the fields
         self.help_button = QtWidgets.QPushButton(self)
-        self.help_button.setGeometry(QtCore.QRect(25, 325, 175, 25))
+        self.help_button.setGeometry(QtCore.QRect(25, 510, 175, 25))
         self.help_button.setText("Help")
-        self.help_button.setObjectName("help-button")
         self.help_button.setStyleSheet("font-size: 15px;")
+        self.help_button.setObjectName("help-button")
         self.help_button.clicked.connect(self.help_window.show)
+
 
         # 25 px away from everything else, big text box for status updates
         # underneath, button to start sending requests
         self.status_text_box = QtWidgets.QTextEdit(self)
-        self.status_text_box.setGeometry(QtCore.QRect(225, 75, 450, 240))
+        self.status_text_box.setGeometry(QtCore.QRect(225, 75, 450, 425))
         self.status_text_box.setReadOnly(True)
         self.status_text_box.setObjectName("status-text-box")
         self.start_button = QtWidgets.QPushButton(self)
-        self.start_button.setGeometry(QtCore.QRect(225, 325, 450, 25))
+        self.start_button.setGeometry(QtCore.QRect(225, 510, 450, 25))
         self.start_button.setText("Start")
         self.start_button.setStyleSheet("font-size: 15px;")
         self.start_button.setObjectName("start-button")
         self.start_button.clicked.connect(self._on_start_button_clicked)
 
         QtCore.QMetaObject.connectSlotsByName(self)
+
+    def _truncate(self, text, length):
+        if len(text) > length:
+            return text[:length] + "..."
+        return text
 
     def _on_link_line_edit_enter(self):
         link = self.link_line_edit.text()
@@ -163,7 +228,8 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
             alert.exec_()
         else:
             self.link = link
-            print(f"Got link: {self.link}")
+            self.add_status_text(f"Got link: {self._truncate(self.link, 50)}")
+            print(f"Got link: {self._truncate(self.link, 100)}")
 
     def _on_recruiter_name_line_edit_enter(self):
         recruiter_name = self.recruiter_name_line_edit.text()
@@ -175,6 +241,7 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
             alert.exec_()
         else:
             self.recruiter_name = recruiter_name
+            self.add_status_text(f"Got recruiter name: {self.recruiter_name}")
             print(f"Got recruiter name: {self.recruiter_name}")
 
     def _on_header_file_dialog_file_selected(self):
@@ -188,6 +255,7 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         else:
             self.header_file = header_file
             self.header_file_line_edit.setText(self.header_file)
+            self.add_status_text(f"Got header file: {self._truncate(self.header_file, 50)}")
             print(f"Got header file: {self.header_file}")
 
     def _on_header_file_button_clicked(self):
@@ -204,6 +272,7 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         else:
             self.cookie_file = cookie_file
             self.cookie_file_line_edit.setText(self.cookie_file)
+            self.add_status_text(f"Got cookie file: {self._truncate(self.cookie_file, 50)}")
             print(f"Got cookie file: {self.cookie_file}")
 
     def _on_cookie_file_button_clicked(self):
@@ -240,12 +309,180 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
             else:
                 self.message_file = message_file
                 self.message_file_line_edit.setText(self.message_file)
+                self.add_status_text(f"Got message file: {self._truncate(self.message_file, 50)}")
                 print(f"Got message file: {self.message_file}")
 
     def _on_message_file_button_clicked(self):
         self.message_file_dialog.open()
 
+    def _on_can_start_line_edit_enter(self):
+        can_start = self.can_start_line_edit.text()
+        alert = QtWidgets.QMessageBox()
+        if can_start == "":
+            alert.setText("Please enter a number.")
+            alert.setWindowTitle("Error - No Number")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            self.can_start = None
+        elif not can_start.isnumeric():
+            alert.setText("Please enter a valid number.")
+            alert.setWindowTitle("Error - Invalid Number")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            self.can_start = None
+        else:
+            self.can_start = int(can_start)
+            self.add_status_text(f"Got start candidate index: {self.can_start}")
+            print(f"Got can start: {self.can_start}")
+
+    def _on_can_count_line_edit_enter(self):
+        can_count = self.can_count_line_edit.text()
+        alert = QtWidgets.QMessageBox()
+        if can_count == "":
+            alert.setText("Please enter a number.")
+            alert.setWindowTitle("Error - No Number")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            self.can_count = None
+        elif not can_count.isnumeric():
+            alert.setText("Please enter a valid number.")
+            alert.setWindowTitle("Error - Invalid Number")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            self.can_count = None
+        elif can_count == "0":
+            alert.setText("Please enter a number greater than 0.")
+            alert.setWindowTitle("Error - Invalid Number")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            self.can_count = None
+        else:
+            self.can_count = int(can_count)
+            self.add_status_text(f"Got candidates per page: {self.can_count}")
+            print(f"Got can count: {self.can_count}")
+
+    def _on_can_end_line_edit_enter(self):
+        can_end = self.can_end_line_edit.text()
+        alert = QtWidgets.QMessageBox()
+        if can_end == "":
+            alert.setText("Please enter a number.")
+            alert.setWindowTitle("Error - No Number")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            self.can_end = None
+        elif not can_end.isnumeric():
+            alert.setText("Please enter a valid number.")
+            alert.setWindowTitle("Error - Invalid Number")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            self.can_end = None
+        elif can_end == "0":
+            alert.setText("Please enter a number greater than 0.")
+            alert.setWindowTitle("Error - Invalid Number")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            self.can_end = None
+        elif int(can_end) < self.can_start:
+            alert.setText("Please enter a number greater than the start candidate.")
+            alert.setWindowTitle("Error - Invalid Number")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            self.can_end = None
+        else:
+            self.can_end = int(can_end)
+            self.add_status_text(f"Got max number of candidates: {self.can_end}")
+            print(f"Got can end: {self.can_end}")
+
+    def _on_connect_count_line_edit_enter(self):
+        connect_count = self.connect_count_line_edit.text()
+        alert = QtWidgets.QMessageBox()
+        if connect_count == "":
+            alert.setText("Please enter a number.")
+            alert.setWindowTitle("Error - No Number")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            self.connect_count = None
+        elif not connect_count.isnumeric():
+            alert.setText("Please enter a valid number.")
+            alert.setWindowTitle("Error - Invalid Number")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            self.connect_count = None
+        elif connect_count == "0":
+            alert.setText("Please enter a number greater than 0.")
+            alert.setWindowTitle("Error - Invalid Number")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            self.connect_count = None
+        else:
+            new_connect_count = int(connect_count) + self.json_data["connections_sent_this_week"]
+            if (new_connect_count > 100):
+                alert.setText("Sending more than 100 connections this week could get you banned. Are you sure you want to continue?")
+                alert.setWindowTitle("Warning - Sending More Than 100 Connections")
+                alert.setIcon(QtWidgets.QMessageBox.Warning)
+                alert.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+                alert.setDefaultButton(QtWidgets.QMessageBox.No)
+                response = alert.exec_()
+                if response == QtWidgets.QMessageBox.No:
+                    self.connect_count = None
+                    return
+
+            self.connect_count = int(connect_count)
+            self.add_status_text(f"Got connections to send: {self.connect_count}")
+            print(f"Got connect count: {self.connect_count}")
+
     def _on_start_button_clicked(self):
+        # check if all fields are filled
+        alert = QtWidgets.QMessageBox()
+        if self.link == None:
+            alert.setText("Please enter a link.")
+            alert.setWindowTitle("Error - No Link")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            return
+        elif self.recruiter_name == None:
+            alert.setText("Please enter a name.")
+            alert.setWindowTitle("Error - No Name")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            return
+        elif self.header_file == None:
+            alert.setText("Please select a header file.")
+            alert.setWindowTitle("Error - No Header File")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            return
+        elif self.cookie_file == None:
+            alert.setText("Please select a cookie file.")
+            alert.setWindowTitle("Error - No Cookie File")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            return
+        elif self.message_file == None:
+            alert.setText("Please select a message file.")
+            alert.setWindowTitle("Error - No Message File")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            return
+        elif self.can_start == None:
+            alert.setText("Please enter a candidate to start at.")
+            alert.setWindowTitle("Error - No Candidate to Start At")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            return
+        elif self.can_count == None:
+            alert.setText("Please enter a number of candidates per page.")
+            alert.setWindowTitle("Error - No Candidates per Page")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            return
+        elif self.can_end == None:
+            alert.setText("Please enter a candidate to end at.")
+            alert.setWindowTitle("Error - No Candidate to End At")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            return
+
         if (self.has_started == False):
             self.start_button.setText("Stop")
             self.has_started = True
@@ -278,6 +515,15 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
     def get_message_file(self):
         return self.message_file
     
+    def get_can_start(self):
+        return self.can_start
+    
+    def get_can_count(self):
+        return self.can_count
+    
+    def get_can_end(self):
+        return self.can_end
+    
     def get_has_started(self):
         return self.has_started
     
@@ -287,4 +533,6 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
     def clear_status_text(self):
         self.status_text = []
         self.status_text_box.clear()
-    
+
+    def set_json_data(self, json_data):
+        self.json_data = json_data
