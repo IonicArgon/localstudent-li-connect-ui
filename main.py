@@ -61,7 +61,21 @@ def scrape_filter_connect():
         window.add_status_text(f"\tcan_count: {can_count}")
         window.add_status_text(f"\tcan_start: {can_start}")
         window.add_status_text(f"\tcan_end: {can_end}")
-        scraper.scrape(url, can_count=can_count, can_start=can_start, can_end=can_end)
+        return_ = scraper.scrape(url, can_count=can_count, can_start=can_start, can_end=can_end)
+
+        # check if we got a 307
+        if return_ == -1:
+            window.add_status_text("WARNING: Got HTTP 307. LinkedIn thinks the account is being shared. It's recommended that you stop for a while.")
+            window.add_status_text("Stopping...")
+            window.reset_start_button()
+            continue
+
+        # check if we got a -2
+        if return_ == -2:
+            window.add_status_text("ERROR: Failed to make request. Stopping...")
+            window.reset_start_button()
+            continue
+
         window.add_status_text("Scraping complete.")
 
         # filter and export to csv

@@ -536,3 +536,7 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
 
     def set_json_data(self, json_data):
         self.json_data = json_data
+
+    def reset_start_button(self):
+        self.start_button.setText("Start")
+        self.has_started = False

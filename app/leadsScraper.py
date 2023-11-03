@@ -45,9 +45,13 @@ class LeadsScraper(Base):
 
             print(f"Got response code {response.status_code}")
 
-            # check if the request was successful
+            # if we get a 307, return a -1
+            if response.status_code == 307:
+                return -1
+
+            # catch all if the request fails
             if response.status_code != 200:
-                break
+                return -2
 
             # parse the response
             data = response.json()
