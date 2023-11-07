@@ -4,11 +4,6 @@ from app.base import Base
 # type import
 from requests.models import Response
 
-# temporary imports for testing and stuff
-import os
-import sys
-import json
-
 
 # exceptions
 class LinkedInMemberObjDoesNotExist(Exception):
@@ -93,33 +88,3 @@ class LeadsConnector(Base):
         
         return response
 
-## quick testing
-# if __name__ == "__main__":
-#     connector = LeadsConnector(
-#         headers=os.path.join(os.getcwd(), "test/identities/mike/headers.json"),
-#         cookies=os.path.join(os.getcwd(), "test/identities/mike/cookies.json"),
-#     )
-
-#     leads = None
-#     with open(os.path.join(os.getcwd(), "test/leads.json"), "r", encoding="utf-8") as f:
-#         leads = json.load(f)
-
-#     print("filtering lead data")
-#     connector.filter_leads(leads)
-
-#     print("writing to file")
-#     with open("test/filtered_leads.json", "w", encoding="utf-8") as f:
-#         json.dump(connector.get_filtered_leads(), f, indent=4)
-
-#     # try to get the profile
-#     print("getting profile")
-#     profile = connector.get_profile(connector.get_filtered_leads()[0]["profile_id"])
-#     profile_urn = connector.get_profile_urn(profile)
-#     response_connection = connector.connect_to_profile(profile_urn, message="Hello, I'm Mike Johnson!")
-
-#     # dump whole response (data, headers, cookies, etc.) to file
-#     print("writing response to file")
-#     with open("test/response.json", "w", encoding="utf-8") as f:
-#         json.dump(response_connection.json(), f, indent=4)
-#         json.dump(dict(response_connection.headers), f, indent=4)
-#         json.dump(dict(response_connection.cookies), f, indent=4)

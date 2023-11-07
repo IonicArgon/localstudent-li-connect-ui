@@ -1,11 +1,9 @@
 import sys
 import threading
-import csv
 import os
 import json
 import datetime
 from gui import GUI_MainWindow
-from gui_help import GUI_Help
 from PyQt5.QtWidgets import QApplication
 
 from app.leadsScraper import LeadsScraper
@@ -14,8 +12,7 @@ from app.leadsConnector import LeadsConnector
 
 # globals
 app = QApplication([])
-help_window = GUI_Help()
-window = GUI_MainWindow(help_window=help_window)
+window = GUI_MainWindow()
 json_data = None
 
 
@@ -52,7 +49,7 @@ def scrape_filter_connect():
         can_end = window.get_can_end()
 
         # set up scraper
-        scraper = LeadsScraper(headers=headers_scrape, cookies=headers_scrape)
+        scraper = LeadsScraper(headers=headers_scrape, cookies=cookies_scrape)
 
         # set up filterer
         filterer = LeadsFilterer()
@@ -82,7 +79,7 @@ def scrape_filter_connect():
 
         window.add_status_text("Scraping complete.")
 
-        # filter and export to csv
+        # filter
         window.add_status_text("Filtering leads...")
         leads = scraper.get_leads()
         filtered_leads = filterer.filter_leads(leads)
@@ -103,22 +100,66 @@ def scrape_filter_connect():
         # ignore duplicates
         filterer.ignore_duplicates(connected_leads_csv=connected_leads_csv)
 
-        # write to csv
-        window.add_status_text("Writing to csv...")
-        with open("filtered_leads.csv", "w", encoding="utf-8", newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(["first_name", "last_name", "profile_id"])
-            for lead in filterer.get_filtered_leads():
-                writer.writerow(
-                    [lead["first_name"], lead["last_name"], lead["profile_id"]]
-                )
-        window.add_status_text("Writing to csv complete.")
-
         # we got this far, check to see if a stop was requested
         if not window.get_has_started():
             window.add_status_text("Request to stop received before connecting. Stopping...")
             continue
 
+        # connect
+        window.add_status_text("Connecting...")
+        leads = filterer.get_filtered_leads()
+        successful_connections = []
+        connect_count = 0
+
+        # check if we have any leads
+        if len(leads) == 0:
+            window.add_status_text("No leads found. Stopping...")
+            window.reset_start_button()
+            continue
+
+        for lead in leads:
+            # check if we've reached the connection limit
+            if connect_count >= window.get_connection_limit():
+                window.add_status_text("Connection limit reached. Stopping...")
+                break
+
+            formatted_message = base_message.format(
+                recruiter_name=window.get_recruiter_name(),
+                lead_name=lead["first_name"],
+            )
+            
+            # check if a stop was requested
+            if not window.get_has_started():
+                window.add_status_text("Request to stop received while connecting. Stopping...")
+                break
+
+            # connect
+            profile = connector.get_profile(lead["profile_id"])
+            profile_urn = connector.get_profile_urn(profile)
+            response_connection = connector.connect_to_profile(profile_urn, message=formatted_message)
+
+            if response_connection.status_code == 200:
+                successful_connections.append(lead["profile_id"])
+                window.add_status_text(f"Successfully connected to {lead['profile_id']}.")
+                connect_count += 1
+            else:
+                window.add_status_text(f"Failed to connect to {lead['profile_id']}.")
+                window.add_status_text(f"Response code: {response_connection.status_code}")
+
+        # dump to csv
+        window.add_status_text("Dumping to csv...")
+        with open("connected_leads.csv", "a", encoding="utf-8", newline='') as f:
+            for lead in successful_connections:
+                f.write(f"{lead}\n")
+        
+        # update the json data
+        json_data["connections_sent_this_week"] += connect_count
+        with open("data.json", "w", encoding="utf-8") as f:
+            json.dump(json_data, f, indent=4)
+
+        # reset the start button
+        window.add_status_text("Done.")
+        window.reset_start_button()
 
 if __name__ == "__main__":    
     # check if the data.json file exists, and load it
@@ -147,10 +188,11 @@ if __name__ == "__main__":
 
     # if it's been a week, reset the connections sent this week, and update the start of the week
     today = datetime.datetime.today()
-    start_of_week = datetime.datetime.strptime(json_data["start_of_week"], "%Y-%m-%d")
-    if today - start_of_week > datetime.timedelta(days=7):
+    current_start_of_week = datetime.datetime.strptime(json_data["start_of_week"], "%Y-%m-%d")
+    if today - current_start_of_week >= datetime.timedelta(days=7):
         json_data["connections_sent_this_week"] = 0
-        json_data["start_of_week"] = today.strftime("%Y-%m-%d")
+        new_start_of_week = today - datetime.timedelta(days=today.weekday())
+        json_data["start_of_week"] = new_start_of_week.strftime("%Y-%m-%d")
         with open("data.json", "w", encoding="utf-8") as f:
             json.dump(json_data, f, indent=4)
 

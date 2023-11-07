@@ -1,9 +1,5 @@
 from app.base import Base
 
-# temporary imports until i figure out how im going to store identities
-import os
-import json
-
 class LeadsScraper(Base):
     def __init__(self, headers: str = None, cookies: str = None):
         super().__init__(headers=headers, cookies=cookies)

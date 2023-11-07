@@ -1,9 +1,3 @@
-#? i'm creating this because in case this code changes later, it's better if i
-#? just break it out
-
-# no imports currently
-
-# exceptions
 class LinkedInMemberObjDoesNotExist(Exception):
     pass
 

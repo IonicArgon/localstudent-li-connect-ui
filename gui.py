@@ -1,12 +1,12 @@
+import webbrowser
 from PyQt5 import QtCore, QtWidgets
 
 class GUI_MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, help_window):
+    def __init__(self):
         super(GUI_MainWindow, self).__init__()
         self.setGeometry(50, 50, 900, 700)
         self.setWindowTitle("LocalStudent LinkedIn Connect")
 
-        self.help_window = help_window
         self.link = None
         self.recruiter_name = None
         self.header_file = None
@@ -236,7 +236,7 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         self.help_button.setText("Help")
         self.help_button.setStyleSheet("font-size: 15px;")
         self.help_button.setObjectName("help-button")
-        self.help_button.clicked.connect(self.help_window.show)
+        self.help_button.clicked.connect(self._on_help_button_clicked)
 
 
         # 25 px away from everything else, big text box for status updates
@@ -510,6 +510,10 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
             self.connect_count = int(connect_count)
             self.add_status_text(f"Got connections to send: {self.connect_count}")
             print(f"Got connect count: {self.connect_count}")
+
+    def _on_help_button_clicked(self):
+        # open a browser window to the help page, for now just example.com
+        webbrowser.open("https://en.wikipedia.org/wiki/Example.com")
 
     def _on_start_button_clicked(self):
         # check if all fields are filled
