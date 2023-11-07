@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtWidgets
 class GUI_MainWindow(QtWidgets.QMainWindow):
     def __init__(self, help_window):
         super(GUI_MainWindow, self).__init__()
-        self.setGeometry(50, 50, 700, 600)
+        self.setGeometry(50, 50, 900, 700)
         self.setWindowTitle("LocalStudent LinkedIn Connect")
 
         self.help_window = help_window
@@ -11,6 +11,8 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         self.recruiter_name = None
         self.header_file = None
         self.cookie_file = None
+        self.recruiterlite_header_file = None
+        self.recruiterlite_cookie_file = None
         self.message_file = None
         self.has_started = False
         self.can_start = 0
@@ -24,7 +26,7 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
     def _setup_ui(self):
         # create title at top of window
         self.title = QtWidgets.QLabel(self)
-        self.title.setGeometry(QtCore.QRect(0, 0, 700, 50))
+        self.title.setGeometry(QtCore.QRect(0, 0, 900, 50))
         self.title.setText("LocalStudent LinkedIn Connect")
         self.title.setStyleSheet("font-size: 20px; font-weight: bold;")
         self.title.setAlignment(QtCore.Qt.AlignCenter)
@@ -108,77 +110,121 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         self.cookie_file_button.setIcon(folder_icon)
         self.cookie_file_button.clicked.connect(self._on_cookie_file_button_clicked)
 
+        # same above but for recruiter lite header file
+        self.recruiterlite_header_file_label = QtWidgets.QLabel(self)
+        self.recruiterlite_header_file_label.setGeometry(QtCore.QRect(25, 250, 175, 50))
+        self.recruiterlite_header_file_label.setText("Recruiter Lite Header File")
+        self.recruiterlite_header_file_label.setStyleSheet("font-size: 15px;")
+        self.recruiterlite_header_file_label.setAlignment(QtCore.Qt.AlignLeft)
+        self.recruiterlite_header_file_label.setObjectName("recruiterlite-header-file-label")
+        self.recruiterlite_header_file_dialog = QtWidgets.QFileDialog(self)
+        self.recruiterlite_header_file_dialog.setGeometry(QtCore.QRect(25, 275, 175, 25))
+        self.recruiterlite_header_file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
+        self.recruiterlite_header_file_dialog.setNameFilter("JSON (*.json)")
+        self.recruiterlite_header_file_dialog.fileSelected.connect(self._on_recruiterlite_header_file_dialog_file_selected)
+        self.recruiterlite_header_file_line_edit = QtWidgets.QLineEdit(self)
+        self.recruiterlite_header_file_line_edit.setGeometry(QtCore.QRect(65, 275, 135, 25))
+        self.recruiterlite_header_file_line_edit.setReadOnly(True)
+        self.recruiterlite_header_file_line_edit.setObjectName("recruiterlite-header-file-line-edit")
+        self.recruiterlite_header_file_button = QtWidgets.QPushButton(self)
+        self.recruiterlite_header_file_button.setGeometry(QtCore.QRect(25, 275, 30, 25))
+        self.recruiterlite_header_file_button.setIcon(folder_icon)
+        self.recruiterlite_header_file_button.clicked.connect(self._on_recruiterlite_header_file_button_clicked)
+
+        # same above but for recruiter lite cookie file
+        self.recruiterlite_cookie_file_label = QtWidgets.QLabel(self)
+        self.recruiterlite_cookie_file_label.setGeometry(QtCore.QRect(25, 300, 175, 50))
+        self.recruiterlite_cookie_file_label.setText("Recruiter Lite Cookie File")
+        self.recruiterlite_cookie_file_label.setStyleSheet("font-size: 15px;")
+        self.recruiterlite_cookie_file_label.setAlignment(QtCore.Qt.AlignLeft)
+        self.recruiterlite_cookie_file_label.setObjectName("recruiterlite-cookie-file-label")
+        self.recruiterlite_cookie_file_dialog = QtWidgets.QFileDialog(self)
+        self.recruiterlite_cookie_file_dialog.setGeometry(QtCore.QRect(25, 325, 175, 25))
+        self.recruiterlite_cookie_file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
+        self.recruiterlite_cookie_file_dialog.setNameFilter("JSON (*.json)")
+        self.recruiterlite_cookie_file_dialog.fileSelected.connect(self._on_recruiterlite_cookie_file_dialog_file_selected)
+        self.recruiterlite_cookie_file_line_edit = QtWidgets.QLineEdit(self)
+        self.recruiterlite_cookie_file_line_edit.setGeometry(QtCore.QRect(65, 325, 135, 25))
+        self.recruiterlite_cookie_file_line_edit.setReadOnly(True)
+        self.recruiterlite_cookie_file_line_edit.setObjectName("recruiterlite-cookie-file-line-edit")
+        self.recruiterlite_cookie_file_button = QtWidgets.QPushButton(self)
+        self.recruiterlite_cookie_file_button.setGeometry(QtCore.QRect(25, 325, 30, 25))
+        self.recruiterlite_cookie_file_button.setIcon(folder_icon)
+        self.recruiterlite_cookie_file_button.clicked.connect(self._on_recruiterlite_cookie_file_button_clicked)
+
         # same above but for message file
         self.message_file_label = QtWidgets.QLabel(self)
-        self.message_file_label.setGeometry(QtCore.QRect(25, 250, 175, 50))
+        self.message_file_label.setGeometry(QtCore.QRect(25, 350, 175, 50))
         self.message_file_label.setText("Message File")
         self.message_file_label.setStyleSheet("font-size: 15px;")
         self.message_file_label.setAlignment(QtCore.Qt.AlignLeft)
         self.message_file_label.setObjectName("message-file-label")
         self.message_file_dialog = QtWidgets.QFileDialog(self)
-        self.message_file_dialog.setGeometry(QtCore.QRect(25, 275, 175, 25))
+        self.message_file_dialog.setGeometry(QtCore.QRect(25, 375, 175, 25))
         self.message_file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         self.message_file_dialog.setNameFilter("Text (*.txt)")
         self.message_file_dialog.fileSelected.connect(self._on_message_file_dialog_file_selected)
         self.message_file_line_edit = QtWidgets.QLineEdit(self)
-        self.message_file_line_edit.setGeometry(QtCore.QRect(65, 275, 135, 25))
+        self.message_file_line_edit.setGeometry(QtCore.QRect(65, 375, 135, 25))
         self.message_file_line_edit.setReadOnly(True)
         self.message_file_line_edit.setObjectName("message-file-line-edit")
         self.message_file_button = QtWidgets.QPushButton(self)
-        self.message_file_button.setGeometry(QtCore.QRect(25, 275, 30, 25))
+        self.message_file_button.setGeometry(QtCore.QRect(25, 375, 30, 25))
         self.message_file_button.setIcon(folder_icon)
         self.message_file_button.clicked.connect(self._on_message_file_button_clicked)
 
         # field for can start, default 0
         self.can_start_label = QtWidgets.QLabel(self)
-        self.can_start_label.setGeometry(QtCore.QRect(25, 300, 175, 50))
+        self.can_start_label.setGeometry(QtCore.QRect(25, 400, 175, 50))
         self.can_start_label.setText("Candidate to Start At")
         self.can_start_label.setStyleSheet("font-size: 15px;")
         self.can_start_label.setAlignment(QtCore.Qt.AlignLeft)
         self.can_start_label.setObjectName("can-start-label")
         self.can_start_line_edit = QtWidgets.QLineEdit(self)
-        self.can_start_line_edit.setGeometry(QtCore.QRect(25, 325, 175, 25))
+        self.can_start_line_edit.setGeometry(QtCore.QRect(25, 425, 175, 25))
         self.can_start_line_edit.setText("0")
         self.can_start_line_edit.setObjectName("can-start-line-edit")
         self.can_start_line_edit.returnPressed.connect(self._on_can_start_line_edit_enter)
 
         # same above but for can count, default 25
         self.can_count_label = QtWidgets.QLabel(self)
-        self.can_count_label.setGeometry(QtCore.QRect(25, 350, 175, 50))
+        self.can_count_label.setGeometry(QtCore.QRect(25, 450, 175, 50))
         self.can_count_label.setText("Candidates per Page")
         self.can_count_label.setStyleSheet("font-size: 15px;")
         self.can_count_label.setAlignment(QtCore.Qt.AlignLeft)
         self.can_count_label.setObjectName("can-count-label")
         self.can_count_line_edit = QtWidgets.QLineEdit(self)
-        self.can_count_line_edit.setGeometry(QtCore.QRect(25, 375, 175, 25))
+        self.can_count_line_edit.setGeometry(QtCore.QRect(25, 475, 175, 25))
         self.can_count_line_edit.setText("25")
         self.can_count_line_edit.setObjectName("can-count-line-edit")
         self.can_count_line_edit.returnPressed.connect(self._on_can_count_line_edit_enter)
 
         # same above but for can end, default 100
         self.can_end_label = QtWidgets.QLabel(self)
-        self.can_end_label.setGeometry(QtCore.QRect(25, 400, 175, 50))
+        self.can_end_label.setGeometry(QtCore.QRect(25, 500, 175, 50))
         self.can_end_label.setText("Candidate to End At")
         self.can_end_label.setStyleSheet("font-size: 15px;")
         self.can_end_label.setAlignment(QtCore.Qt.AlignLeft)
         self.can_end_label.setObjectName("can-end-label")
         self.can_end_line_edit = QtWidgets.QLineEdit(self)
-        self.can_end_line_edit.setGeometry(QtCore.QRect(25, 425, 175, 25))
+        self.can_end_line_edit.setGeometry(QtCore.QRect(25, 525, 175, 25))
         self.can_end_line_edit.setText("100")
         self.can_end_line_edit.setObjectName("can-end-line-edit")
         self.can_end_line_edit.returnPressed.connect(self._on_can_end_line_edit_enter)
+        self.can_count_line_edit.setObjectName("can-count-line-edit")
+        self.can_count_line_edit.returnPressed.connect(self._on_can_count_line_edit_enter)
 
         # field for how many connection to send in this batch
         # 25 px away from left edge, below everything currently
         # default 10
         self.connect_count_label = QtWidgets.QLabel(self)
-        self.connect_count_label.setGeometry(QtCore.QRect(25, 450, 175, 50))
+        self.connect_count_label.setGeometry(QtCore.QRect(25, 550, 175, 50))
         self.connect_count_label.setText("Connections to Send")
         self.connect_count_label.setStyleSheet("font-size: 15px;")
         self.connect_count_label.setAlignment(QtCore.Qt.AlignLeft)
         self.connect_count_label.setObjectName("connect-count-label")
         self.connect_count_line_edit = QtWidgets.QLineEdit(self)
-        self.connect_count_line_edit.setGeometry(QtCore.QRect(25, 475, 175, 25))
+        self.connect_count_line_edit.setGeometry(QtCore.QRect(25, 575, 175, 25))
         self.connect_count_line_edit.setText("10")
         self.connect_count_line_edit.setObjectName("connect-count-line-edit")
         self.connect_count_line_edit.returnPressed.connect(self._on_connect_count_line_edit_enter)
@@ -186,7 +232,7 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
 
         # help button opens help window, underneath all the fields
         self.help_button = QtWidgets.QPushButton(self)
-        self.help_button.setGeometry(QtCore.QRect(25, 510, 175, 25))
+        self.help_button.setGeometry(QtCore.QRect(25, 610, 175, 25))
         self.help_button.setText("Help")
         self.help_button.setStyleSheet("font-size: 15px;")
         self.help_button.setObjectName("help-button")
@@ -196,11 +242,11 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         # 25 px away from everything else, big text box for status updates
         # underneath, button to start sending requests
         self.status_text_box = QtWidgets.QTextEdit(self)
-        self.status_text_box.setGeometry(QtCore.QRect(225, 75, 450, 425))
+        self.status_text_box.setGeometry(QtCore.QRect(225, 75, 625, 525))
         self.status_text_box.setReadOnly(True)
         self.status_text_box.setObjectName("status-text-box")
         self.start_button = QtWidgets.QPushButton(self)
-        self.start_button.setGeometry(QtCore.QRect(225, 510, 450, 25))
+        self.start_button.setGeometry(QtCore.QRect(225, 610, 625, 25))
         self.start_button.setText("Start")
         self.start_button.setStyleSheet("font-size: 15px;")
         self.start_button.setObjectName("start-button")
@@ -277,6 +323,40 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
 
     def _on_cookie_file_button_clicked(self):
         self.cookie_file_dialog.open()
+
+    def _on_recruiterlite_header_file_dialog_file_selected(self):
+        recruiterlite_header_file = self.recruiterlite_header_file_dialog.selectedFiles()[0]
+        alert = QtWidgets.QMessageBox()
+        if recruiterlite_header_file == "":
+            alert.setText("Please select a file.")
+            alert.setWindowTitle("Error - No File")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+        else:
+            self.recruiterlite_header_file = recruiterlite_header_file
+            self.recruiterlite_header_file_line_edit.setText(self.recruiterlite_header_file)
+            self.add_status_text(f"Got recruiter lite header file: {self._truncate(self.recruiterlite_header_file, 50)}")
+            print(f"Got recruiter lite header file: {self.recruiterlite_header_file}")
+
+    def _on_recruiterlite_header_file_button_clicked(self):
+        self.recruiterlite_header_file_dialog.open()
+
+    def _on_recruiterlite_cookie_file_dialog_file_selected(self):
+        recruiterlite_cookie_file = self.recruiterlite_cookie_file_dialog.selectedFiles()[0]
+        alert = QtWidgets.QMessageBox()
+        if recruiterlite_cookie_file == "":
+            alert.setText("Please select a file.")
+            alert.setWindowTitle("Error - No File")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+        else:
+            self.recruiterlite_cookie_file = recruiterlite_cookie_file
+            self.recruiterlite_cookie_file_line_edit.setText(self.recruiterlite_cookie_file)
+            self.add_status_text(f"Got recruiter lite cookie file: {self._truncate(self.recruiterlite_cookie_file, 50)}")
+            print(f"Got recruiter lite cookie file: {self.recruiterlite_cookie_file}")
+
+    def _on_recruiterlite_cookie_file_button_clicked(self):
+        self.recruiterlite_cookie_file_dialog.open()
 
     def _on_message_file_dialog_file_selected(self):
         message_file = self.message_file_dialog.selectedFiles()[0]
@@ -458,6 +538,18 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
             alert.setIcon(QtWidgets.QMessageBox.Warning)
             alert.exec_()
             return
+        elif self.recruiterlite_header_file == None:
+            alert.setText("Please select a recruiter lite header file.")
+            alert.setWindowTitle("Error - No Recruiter Lite Header File")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            return
+        elif self.recruiterlite_cookie_file == None:
+            alert.setText("Please select a recruiter lite cookie file.")
+            alert.setWindowTitle("Error - No Recruiter Lite Cookie File")
+            alert.setIcon(QtWidgets.QMessageBox.Warning)
+            alert.exec_()
+            return
         elif self.message_file == None:
             alert.setText("Please select a message file.")
             alert.setWindowTitle("Error - No Message File")
@@ -482,6 +574,7 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
             alert.setIcon(QtWidgets.QMessageBox.Warning)
             alert.exec_()
             return
+        
 
         if (self.has_started == False):
             self.start_button.setText("Stop")
@@ -511,6 +604,12 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
     
     def get_cookie_file(self):
         return self.cookie_file
+    
+    def get_recruiterlite_header_file(self):
+        return self.recruiterlite_header_file
+    
+    def get_recruiterlite_cookie_file(self):
+        return self.recruiterlite_cookie_file
     
     def get_message_file(self):
         return self.message_file

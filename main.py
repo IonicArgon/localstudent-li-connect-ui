@@ -33,9 +33,13 @@ def scrape_filter_connect():
         # get the url
         url = window.get_link()
 
-        # get the credentials
-        headers = window.get_header_file()
-        cookies = window.get_cookie_file()
+        # get the credentials for scraper
+        headers_scrape = window.get_recruiterlite_header_file()
+        cookies_scrape = window.get_recruiterlite_cookie_file()
+
+        # get the credentials for connector
+        headers_connect = window.get_header_file()
+        cookies_connect = window.get_cookie_file()
 
         # get the message
         base_message = window.get_message_file()
@@ -48,13 +52,13 @@ def scrape_filter_connect():
         can_end = window.get_can_end()
 
         # set up scraper
-        scraper = LeadsScraper(headers=headers, cookies=cookies)
+        scraper = LeadsScraper(headers=headers_scrape, cookies=headers_scrape)
 
         # set up filterer
         filterer = LeadsFilterer()
 
         # set up connector
-        connector = LeadsConnector(headers=headers, cookies=cookies)
+        connector = LeadsConnector(headers=headers_connect, cookies=cookies_connect)
 
         # scrape
         window.add_status_text("Scraping with parameters:")
