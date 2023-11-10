@@ -1,5 +1,6 @@
 import sys
 import threading
+import time
 import os
 import json
 import datetime
@@ -109,6 +110,7 @@ def scrape_filter_connect():
         window.add_status_text("Connecting...")
         leads = filterer.get_filtered_leads()
         successful_connections = []
+        failed_connections = []
         connect_count = 0
 
         # check if we have any leads
@@ -119,7 +121,7 @@ def scrape_filter_connect():
 
         for lead in leads:
             # check if we've reached the connection limit
-            if connect_count >= window.get_connection_limit():
+            if connect_count >= window.get_connect_count():
                 window.add_status_text("Connection limit reached. Stopping...")
                 break
 
@@ -143,23 +145,53 @@ def scrape_filter_connect():
                 window.add_status_text(f"Successfully connected to {lead['profile_id']}.")
                 connect_count += 1
             else:
+                failed_connections.append(lead["profile_id"])
                 window.add_status_text(f"Failed to connect to {lead['profile_id']}.")
                 window.add_status_text(f"Response code: {response_connection.status_code}")
 
         # dump to csv
-        window.add_status_text("Dumping to csv...")
+        window.add_status_text("Dumping successful connections...")
         with open("connected_leads.csv", "a", encoding="utf-8", newline='') as f:
             for lead in successful_connections:
+                f.write(f"{lead}\n")
+
+        window.add_status_text("Dumping failed connections...")
+        with open("failed_leads.csv", "a", encoding="utf-8", newline='') as f:
+            for lead in failed_connections:
                 f.write(f"{lead}\n")
         
         # update the json data
         json_data["connections_sent_this_week"] += connect_count
+        json_data["connections_sent_today"] += connect_count
         with open("data.json", "w", encoding="utf-8") as f:
             json.dump(json_data, f, indent=4)
 
         # reset the start button
         window.add_status_text("Done.")
         window.reset_start_button()
+
+# this thread is to update saved credentials
+def update_credentials():
+    while True:
+        recruiter_name = window.get_recruiter_name()
+        recruiterlite_header_file = window.get_recruiterlite_header_file()
+        recruiterlite_cookie_file = window.get_recruiterlite_cookie_file()
+        header_file = window.get_header_file()
+        cookie_file = window.get_cookie_file()
+        message_file = window.get_message_file()
+
+        json_data["recruiter_name"] = recruiter_name
+        json_data["recruiterlite_header_file"] = recruiterlite_header_file
+        json_data["recruiterlite_cookie_file"] = recruiterlite_cookie_file
+        json_data["header_file"] = header_file
+        json_data["cookie_file"] = cookie_file
+        json_data["message_file"] = message_file
+
+        with open("data.json", "w", encoding="utf-8") as f:
+            json.dump(json_data, f, indent=4)
+
+        # sleep for 5 seconds
+        time.sleep(5)
 
 if __name__ == "__main__":    
     # check if the data.json file exists, and load it
@@ -173,7 +205,15 @@ if __name__ == "__main__":
     if len(json_data) == 0:
         json_data = {
             "connections_sent_this_week": 0,
+            "connections_sent_today": 0,
             "start_of_week": "",
+            "last_ran": "",
+            "recruiter_name": "",
+            "recruiterlite_header_file": "",
+            "recruiterlite_cookie_file": "",
+            "header_file": "",
+            "cookie_file": "",
+            "message_file": "",
         }
         with open("data.json", "w", encoding="utf-8") as f:
             json.dump(json_data, f, indent=4)
@@ -183,6 +223,13 @@ if __name__ == "__main__":
         today = datetime.datetime.today()
         start_of_week = today - datetime.timedelta(days=today.weekday())
         json_data["start_of_week"] = start_of_week.strftime("%Y-%m-%d")
+        with open("data.json", "w", encoding="utf-8") as f:
+            json.dump(json_data, f, indent=4)
+
+    # automatically get the last ran if it's empty
+    if json_data["last_ran"] == "":
+        today = datetime.datetime.today()
+        json_data["last_ran"] = today.strftime("%Y-%m-%d")
         with open("data.json", "w", encoding="utf-8") as f:
             json.dump(json_data, f, indent=4)
 
@@ -196,9 +243,32 @@ if __name__ == "__main__":
         with open("data.json", "w", encoding="utf-8") as f:
             json.dump(json_data, f, indent=4)
 
+    # if it's a new day, reset the connections sent today and update the last ran
+    today = datetime.datetime.today()
+    current_last_ran = datetime.datetime.strptime(json_data["last_ran"], "%Y-%m-%d")
+    if today - current_last_ran >= datetime.timedelta(days=1):
+        json_data["connections_sent_today"] = 0
+        json_data["last_ran"] = today.strftime("%Y-%m-%d")
+        with open("data.json", "w", encoding="utf-8") as f:
+            json.dump(json_data, f, indent=4)
+
+    # attempt to load any saved credentials
+    window.fill_previous_data(
+        recruiter_name=json_data["recruiter_name"],
+        recruiterlite_header_file=json_data["recruiterlite_header_file"],
+        recruiterlite_cookie_file=json_data["recruiterlite_cookie_file"],
+        header_file=json_data["header_file"],
+        cookie_file=json_data["cookie_file"],
+        message_file=json_data["message_file"],
+    )
+
     main_working_thread = threading.Thread(target=scrape_filter_connect)
     main_working_thread.daemon = True
     main_working_thread.start()
+
+    update_credentials_thread = threading.Thread(target=update_credentials)
+    update_credentials_thread.daemon = True
+    update_credentials_thread.start()
 
     window.set_json_data(json_data)
     window.show()

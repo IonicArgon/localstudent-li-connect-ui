@@ -160,4 +160,6 @@ cython_debug/
 #.idea/
 
 test/
-filtered_leads.csv
+connected_leads.csv
+failed_leads.csv
+data.json

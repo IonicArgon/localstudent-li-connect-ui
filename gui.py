@@ -506,14 +506,23 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
                 if response == QtWidgets.QMessageBox.No:
                     self.connect_count = None
                     return
+            elif (int(connect_count) > 20):
+                alert.setText("Sending more than 20 connections in a day could get you banned. Are you sure you want to continue?")
+                alert.setWindowTitle("Warning - Sending More Than 20 Connections")
+                alert.setIcon(QtWidgets.QMessageBox.Warning)
+                alert.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+                alert.setDefaultButton(QtWidgets.QMessageBox.No)
+                response = alert.exec_()
+                if response == QtWidgets.QMessageBox.No:
+                    self.connect_count = None
+                    return
 
             self.connect_count = int(connect_count)
             self.add_status_text(f"Got connections to send: {self.connect_count}")
             print(f"Got connect count: {self.connect_count}")
 
     def _on_help_button_clicked(self):
-        # open a browser window to the help page, for now just example.com
-        webbrowser.open("https://en.wikipedia.org/wiki/Example.com")
+        webbrowser.open("https://gist.github.com/IonicArgon/3964896e92e81d260d933a681df08fcc")
 
     def _on_start_button_clicked(self):
         # check if all fields are filled
@@ -627,6 +636,9 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
     def get_can_end(self):
         return self.can_end
     
+    def get_connect_count(self):
+        return self.connect_count
+    
     def get_has_started(self):
         return self.has_started
     
@@ -643,3 +655,42 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
     def reset_start_button(self):
         self.start_button.setText("Start")
         self.has_started = False
+
+    def fill_previous_data(self, **kwargs) -> None:
+        self.add_status_text("Filling previous data...")
+
+        if kwargs["recruiter_name"]:
+            self.recruiter_name = kwargs["recruiter_name"]
+            self.recruiter_name_line_edit.setText(self.recruiter_name)
+            self.add_status_text(f"\tGot recruiter name: {self.recruiter_name}")
+            print(f"Got recruiter name: {self.recruiter_name}")
+        
+        if kwargs["recruiterlite_header_file"]:
+            self.recruiterlite_header_file = kwargs["recruiterlite_header_file"]
+            self.recruiterlite_header_file_line_edit.setText(self.recruiterlite_header_file)
+            self.add_status_text(f"\tGot recruiter lite header file: {self._truncate(self.recruiterlite_header_file, 50)}")
+            print(f"Got recruiter lite header file: {self.recruiterlite_header_file}")
+
+        if kwargs["recruiterlite_cookie_file"]:
+            self.recruiterlite_cookie_file = kwargs["recruiterlite_cookie_file"]
+            self.recruiterlite_cookie_file_line_edit.setText(self.recruiterlite_cookie_file)
+            self.add_status_text(f"\tGot recruiter lite cookie file: {self._truncate(self.recruiterlite_cookie_file, 50)}")
+            print(f"Got recruiter lite cookie file: {self.recruiterlite_cookie_file}")
+
+        if kwargs["header_file"]:
+            self.header_file = kwargs["header_file"]
+            self.header_file_line_edit.setText(self.header_file)
+            self.add_status_text(f"\tGot header file: {self._truncate(self.header_file, 50)}")
+            print(f"Got header file: {self.header_file}")
+
+        if kwargs["cookie_file"]:
+            self.cookie_file = kwargs["cookie_file"]
+            self.cookie_file_line_edit.setText(self.cookie_file)
+            self.add_status_text(f"\tGot cookie file: {self._truncate(self.cookie_file, 50)}")
+            print(f"Got cookie file: {self.cookie_file}")
+
+        if kwargs["message_file"]:
+            self.message_file = kwargs["message_file"]
+            self.message_file_line_edit.setText(self.message_file)
+            self.add_status_text(f"\tGot message file: {self._truncate(self.message_file, 50)}")
+            print(f"Got message file: {self.message_file}")

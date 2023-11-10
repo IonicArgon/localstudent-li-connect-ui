@@ -1,4 +1,12 @@
 {
-    "connections_sent_this_week": 0,
-    "start_of_week": "2023-11-06"
+    "connections_sent_this_week": 10,
+    "connections_sent_today": 0,
+    "start_of_week": "2023-11-06",
+    "last_ran": "2023-11-10",
+    "recruiter_name": "Marco",
+    "recruiterlite_header_file": "D:/Code/LocalStudent/localstudent-li-connect-ui/test/headers.json",
+    "recruiterlite_cookie_file": "D:/Code/LocalStudent/localstudent-li-connect-ui/test/cookies.json",
+    "header_file": "D:/Code/LocalStudent/localstudent-msg-backend/test/identities/mike/headers.json",
+    "cookie_file": "D:/Code/LocalStudent/localstudent-li-connect-ui/test/cookies.json",
+    "message_file": "D:/Code/LocalStudent/localstudent-li-connect-ui/test/sendtest.txt"
 }
