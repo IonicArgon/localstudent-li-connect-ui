@@ -2,6 +2,8 @@ import webbrowser
 from PyQt5 import QtCore, QtWidgets
 
 class GUI_MainWindow(QtWidgets.QMainWindow):
+    add_status_text_signal = QtCore.pyqtSignal(str)
+
     def __init__(self):
         super(GUI_MainWindow, self).__init__()
         self.setGeometry(50, 50, 900, 700)
@@ -20,6 +22,8 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         self.can_end = 100
         self.connect_count = 10
         self.json_data = None
+
+        self.add_status_text_signal.connect(self._add_status_text_slot)
 
         self._setup_ui()
 
@@ -253,6 +257,10 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         self.start_button.clicked.connect(self._on_start_button_clicked)
 
         QtCore.QMetaObject.connectSlotsByName(self)
+
+    @QtCore.pyqtSlot(str)
+    def _add_status_text_slot(self, text):
+        self._update_status_text_box(text)
 
     def _truncate(self, text, length):
         if len(text) > length:
@@ -643,7 +651,7 @@ class GUI_MainWindow(QtWidgets.QMainWindow):
         return self.has_started
     
     def add_status_text(self, text):
-        self._update_status_text_box(text)
+        self.add_status_text_signal.emit(text)
 
     def clear_status_text(self):
         self.status_text = []

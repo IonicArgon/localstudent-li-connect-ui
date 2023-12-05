@@ -1,6 +1,6 @@
 # imports up here
 from app.base import Base
-
+import pprint
 # type import
 from requests.models import Response
 
@@ -40,7 +40,7 @@ class LeadsConnector(Base):
         return response.json()
     
     def get_profile_urn(self, json_data: dict) -> str:
-        elements_first = json_data.get("elements", None)[0]
+        elements_first = json_data.get("data", None)
 
         if elements_first is None:
             raise LinkedInProfileObjMalformed(
@@ -48,14 +48,15 @@ class LeadsConnector(Base):
             )
         
         # look for a value starting with "urn:li:fsd_profile:" within the json
-        for value in elements_first.values():
-            if isinstance(value, str) and value.startswith("urn:li:fsd_profile:"):
-                return value
+        urn = None
+        urn = elements_first["*elements"][0]
+
+        if urn is None:
+            raise LinkedInProfileObjMalformed(
+                "LinkedIn profile object is malformed! Maybe LinkedIn changed their API?"
+            )
         
-        # if we get here, then we didn't find a value
-        raise LinkedInProfileObjMalformed(
-            "LinkedIn profile object is malformed! Maybe LinkedIn changed their API?"
-        )
+        return urn
     
     def connect_to_profile(self, profile_urn, message: str = "") -> Response:
         params = {

@@ -6,6 +6,7 @@ import json
 import datetime
 from gui import GUI_MainWindow
 from PyQt5.QtWidgets import QApplication
+import PyQt5.QtCore as QtCore
 
 from app.leadsScraper import LeadsScraper
 from app.leadsFilterer import LeadsFilterer
@@ -138,6 +139,13 @@ def scrape_filter_connect():
             # connect
             profile = connector.get_profile(lead["profile_id"])
             profile_urn = connector.get_profile_urn(profile)
+
+            # if we get a None, then we'll skip
+            if profile_urn is None:
+                failed_connections.append(lead["profile_id"])
+                window.add_status_text(f"Failed to connect to {lead['profile_id']}.")
+                continue
+
             response_connection = connector.connect_to_profile(profile_urn, message=formatted_message)
 
             if response_connection.status_code == 200:
