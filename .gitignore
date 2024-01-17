@@ -166,3 +166,4 @@ test/
 connected_leads.csv
 failed_leads.csv
 data.json
+credentials/
