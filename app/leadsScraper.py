@@ -41,6 +41,9 @@ class LeadsScraper(Base):
 
             print(f"Got response code {response.status_code}")
 
+            if response.status_code == 401:
+                print("Got 401 with message: ", response.text)
+
             # if we get a 307, return a -1
             if response.status_code == 307:
                 return -1

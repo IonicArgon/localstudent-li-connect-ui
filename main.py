@@ -138,6 +138,13 @@ def scrape_filter_connect():
 
             # connect
             profile = connector.get_profile(lead["profile_id"])
+
+            # if we get a None, then we'll skip
+            if profile is None:
+                failed_connections.append(lead["profile_id"])
+                window.add_status_text(f"Failed to connect to {lead['profile_id']}.")
+                continue
+
             profile_urn = connector.get_profile_urn(profile)
 
             # if we get a None, then we'll skip

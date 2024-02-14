@@ -3,6 +3,7 @@ from app.base import Base
 import pprint
 # type import
 from requests.models import Response
+import requests
 
 
 # exceptions
@@ -32,8 +33,30 @@ class LeadsConnector(Base):
             "https://www.linkedin.com/voyager/api/identity/dash/profiles",
             params=params,
             timeout=10,
+            allow_redirects=False
         )
+        redirect_link = None
 
+        # check if the profile was redirected
+        if response.status_code == 302:
+            redirect_link = response.headers["Location"]
+
+            # attempt to follow the redirect
+            response = self.m_session.get(
+                redirect_link,
+                timeout=10,
+                allow_redirects=False
+            )
+
+            # if it's still a redirect, we'll print out info and return None
+            if response.status_code == 302:
+                print(f"Error with profile {profile_id}! Redirected to {redirect_link} and then to {response.headers['Location']}. Dumping informaton:\n")
+                print("Headers:")
+                pprint.pprint(response.headers)
+                print("\nBody:")
+                pprint.pprint(response.text)
+                return None
+        
         if response.status_code != 200:
             return None
         
